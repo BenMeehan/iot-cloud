@@ -1,0 +1,20 @@
+device:
+  secret_file: "secrets/.device.secret.PSK.txt"
+
+mqtt:
+  broker: "ssl://broker.emqx.io:8883"
+  client_id: "iot_registration_service-"
+  QOS: 2
+  topics: 
+    request: "$share/registration/iot-registration"
+    response: "iot-registration/response"
+  tls:
+    ca_cert: "certs/broker.emqx.io-ca.crt"
+
+database:
+  host: "mgyesa3twa.m6cs99jzs9.tsdb.cloud.timescale.com"
+  user: "tsdbadmin"
+  password: "x2d85qp40hmir0qf"
+  dbname: "tsdb"
+  port: 38527
+  sslmode: "require"
