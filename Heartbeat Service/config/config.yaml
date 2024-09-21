@@ -4,6 +4,7 @@ mqtt:
   topic: "$share/heartbeat/iot-heartbeat"
   tls:
     ca_cert: "certs/broker.emqx.io-ca.crt"
+  QOS: 1
 
 database:
   host: "mgyesa3twa.m6cs99jzs9.tsdb.cloud.timescale.com"
