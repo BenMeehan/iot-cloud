@@ -38,12 +38,12 @@ type Config struct {
 
 // LoadConfig loads the YAML configuration from the specified file.
 // It returns a pointer to the Config struct and an error if loading fails.
-func LoadConfig(filename string) (*Config, error) {
-	logrus.Infof("Loading configuration from file: %s", filename)
+func LoadConfig(filename string, logger *logrus.Logger) (*Config, error) {
+	logger.Infof("Loading configuration from file: %s", filename)
 
 	file, err := os.Open(filename)
 	if err != nil {
-		logrus.Errorf("Failed to open config file: %v", err)
+		logger.Errorf("Failed to open config file: %v", err)
 		return nil, err
 	}
 	defer file.Close()
@@ -53,10 +53,10 @@ func LoadConfig(filename string) (*Config, error) {
 	decoder := yaml.NewDecoder(file)
 	err = decoder.Decode(&config)
 	if err != nil {
-		logrus.Errorf("Failed to decode config file: %v", err)
+		logger.Errorf("Failed to decode config file: %v", err)
 		return nil, err
 	}
 
-	logrus.Infof("Configuration loaded successfully from %s", filename)
+	logger.Infof("Configuration loaded successfully from %s", filename)
 	return &config, nil
 }

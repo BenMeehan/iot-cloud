@@ -16,43 +16,46 @@ import (
 
 func main() {
 	// Set up structured logging with JSON output
-	logrus.SetFormatter(&logrus.JSONFormatter{})
-	logrus.SetOutput(os.Stdout)
-	logrus.SetLevel(logrus.InfoLevel)
+	var log = &logrus.Logger{
+		Out:       os.Stdout,
+		Formatter: new(logrus.JSONFormatter),
+		Hooks:     make(logrus.LevelHooks),
+		Level:     logrus.InfoLevel,
+	}
 
 	// Load configuration from file
-	config, err := utils.LoadConfig("config/config.yaml")
+	config, err := utils.LoadConfig("config/config.yaml", log)
 	if err != nil {
-		logrus.WithError(err).Fatal("Failed to load configuration")
+		log.WithError(err).Fatal("Failed to load configuration")
 	}
 
 	// Generate a unique MQTT Client ID by appending a UUID
 	config.MQTT.ClientID = config.MQTT.ClientID + "-" + uuid.New().String()
-	logrus.Infof("Using MQTT Client ID: %s", config.MQTT.ClientID)
+	log.Infof("Using MQTT Client ID: %s", config.MQTT.ClientID)
 
 	// Initialize the shared MQTT connection
-	mqttClient := mqtt.NewMqttService()
+	mqttClient := mqtt.NewMqttService(log)
 	err = mqttClient.Initialize(config.MQTT.Broker, config.MQTT.ClientID, config.MQTT.TLS.CACert)
 	if err != nil {
-		logrus.WithError(err).Fatal("Failed to initialize MQTT connection")
+		log.WithError(err).Fatal("Failed to initialize MQTT connection")
 	}
 
 	// Initialize the database connection
-	dBClient := database.NewDatabase()
+	dBClient := database.NewDatabase(log)
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 		config.DB.Host, config.DB.Port, config.DB.User, config.DB.Password, config.DB.Name, config.DB.SSLMode)
 
 	if err := dBClient.Connect(connStr); err != nil {
-		logrus.WithError(err).Fatal("Failed to initialize database connection")
+		log.WithError(err).Fatal("Failed to initialize database connection")
 	}
 	defer dBClient.Close()
 
 	// Initialize file operations handler
-	fileClient := file.NewFileService()
+	fileClient := file.NewFileService(log)
 
 	secret, err := fileClient.ReadFile(config.Device.SecretFile)
 	if err != nil {
-		logrus.WithError(err).Fatal("Failed to read auth secret")
+		log.WithError(err).Fatal("Failed to read auth secret")
 	}
 
 	registraionService := &services.RegistrationService{
@@ -62,11 +65,12 @@ func main() {
 		SubTopic:   config.MQTT.Topics.Request,
 		PubTopic:   config.MQTT.Topics.Response,
 		Secret:     secret,
+		Logger:     log,
 	}
 
 	registraionService.ListenForDeviceRegistration()
 
 	// Block the main thread to keep services running
-	logrus.Info("Registration service is running...")
+	log.Info("Registration service is running...")
 	select {}
 }
