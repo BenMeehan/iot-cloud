@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/benmeehan/iot-registration-service/internal/constants"
 	"github.com/benmeehan/iot-registration-service/internal/database"
 	"github.com/benmeehan/iot-registration-service/internal/services"
 	"github.com/benmeehan/iot-registration-service/internal/utils"
@@ -59,21 +60,25 @@ func main() {
 		log.WithError(err).Fatal("Failed to read auth secret")
 	}
 
-	// Inititalize Kafka consumer
-	kafkaClient, err := kafka.NewKafkaClient(
-		config.Kafka.SecurityProtocol,
-		config.Kafka.SSL.CACert,
-		config.Kafka.SSL.Cert,
-		config.Kafka.SSL.Key,
-		config.Kafka.SASL.Mechanism,
-		config.Kafka.SASL.Username,
-		config.Kafka.SASL.Password,
-		config.Kafka.Brokers,
-		config.Kafka.GroupID,
-		log,
-	)
-	if err != nil {
-		log.WithError(err).Fatal("Failed to initialize Kafka Client")
+	var kafkaClient *kafka.KafkaClient
+
+	// Initialize Kafka client only if the mode is queue
+	if config.Service.Mode == constants.QUEUE_MODE {
+		kafkaClient, err = kafka.NewKafkaClient(
+			config.Kafka.SecurityProtocol,
+			config.Kafka.SSL.CACert,
+			config.Kafka.SSL.Cert,
+			config.Kafka.SSL.Key,
+			config.Kafka.SASL.Mechanism,
+			config.Kafka.SASL.Username,
+			config.Kafka.SASL.Password,
+			config.Kafka.Brokers,
+			config.Kafka.GroupID,
+			log,
+		)
+		if err != nil {
+			log.WithError(err).Fatal("Failed to initialize Kafka Client")
+		}
 	}
 
 	registraionService := services.NewRegistrationService(config.Service.Mode, mqttClient, kafkaClient, dBClient, config.MQTT.Topics.Response, config.MQTT.Topics.Request, config.MQTT.QOS, secret, log)

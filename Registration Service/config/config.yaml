@@ -12,11 +12,11 @@ mqtt:
     ca_cert: "certs/broker.emqx.io-ca.crt"
 
 kafka:
-  topic: "iot_heartbeat"
+  topic: "iot_registration"
   brokers: ["localhost:9092"]
   client_id: "kafka-mqtt-connector"
   security_protocol: "SSL"  
-  group_id: "iot_heartbeat_service_group"
+  group_id: "iot_registration_service_group"
   ssl:
     ca_cert: "path/to/ca-cert.pem"          
     cert: "path/to/client-cert.pem"         
@@ -35,4 +35,4 @@ database:
   sslmode: "require"
 
 service:
-  mode: "queue"
+  mode: "mqtt"

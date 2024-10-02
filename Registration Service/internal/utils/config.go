@@ -36,7 +36,7 @@ type Config struct {
 	} `yaml:"device"`
 
 	Kafka struct {
-		Topic            string   `yaml:"brokers"`           // Kafka topic
+		Topic            string   `yaml:"topic"`             // Kafka topic
 		Brokers          []string `yaml:"brokers"`           // List of Kafka brokers
 		ClientID         string   `yaml:"client_id"`         // Kafka client ID
 		SecurityProtocol string   `yaml:"security_protocol"` // Security protocol

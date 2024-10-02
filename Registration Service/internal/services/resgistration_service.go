@@ -79,7 +79,7 @@ func (rs *RegistrationService) handleRegistrationRequest(client MQTT.Client, msg
 }
 
 // handleRegistrationRequestKafka processes incoming device registration requests via Kafka
-func (rs *RegistrationService) handleRegistrationRequestKafka(message KAFKA.Message) {
+func (rs *RegistrationService) handleRegistrationRequestKafka(message *KAFKA.Message) {
 	payload := message.Value
 	rs.processRegistrationRequest(payload)
 }
@@ -141,12 +141,10 @@ func (rs *RegistrationService) registerDevice(clientID, deviceSecret string) (st
 	if err := rs.DBClient.SaveDevice(device); err != nil {
 		return "", err
 	}
-  
+
 	return deviceID, nil
 }
 
-// generateDeviceID creates a new unique device ID
-func generateDeviceID() (string, error) {
 // using uuid v7 as it is time sortable
 func generateDeviceID() (string, error) {
 	id, err := uuid.NewV7()
