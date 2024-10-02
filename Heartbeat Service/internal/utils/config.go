@@ -49,6 +49,10 @@ type Config struct {
 	Service struct {
 		Mode string `yaml:"mode"` // Direct MQTT or Queue mode
 	} `yaml:"service"`
+  
+	Device struct {
+		SecretFile string `yaml:"secret_file"` // Device secret location
+	} `yaml:"device"`
 }
 
 // LoadConfig loads the YAML configuration from the specified file.

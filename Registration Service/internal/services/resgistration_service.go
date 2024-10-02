@@ -126,10 +126,12 @@ func extractFields(payload map[string]string) (string, string, error) {
 
 // registerDevice stores the device information in the database
 func (rs *RegistrationService) registerDevice(clientID, deviceSecret string) (string, error) {
+	// Compare the provided device secret with the stored secret
 	if deviceSecret != rs.Secret {
 		return "", fmt.Errorf("invalid device secret provided for client: %s", clientID)
 	}
 
+	// Generate a new device ID
 	deviceID, err := generateDeviceID()
 	if err != nil {
 		return "", err
@@ -139,13 +141,15 @@ func (rs *RegistrationService) registerDevice(clientID, deviceSecret string) (st
 	if err := rs.DBClient.SaveDevice(device); err != nil {
 		return "", err
 	}
-
+  
 	return deviceID, nil
 }
 
 // generateDeviceID creates a new unique device ID
 func generateDeviceID() (string, error) {
-	id, err := uuid.NewRandom() // Using NewRandom for uniqueness without time-sort
+// using uuid v7 as it is time sortable
+func generateDeviceID() (string, error) {
+	id, err := uuid.NewV7()
 	if err != nil {
 		return "", err
 	}
