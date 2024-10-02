@@ -14,24 +14,33 @@ type Config struct {
 		ClientID string `yaml:"client_id"` // MQTT client ID
 		QOS      int    `yaml:"QOS"`       // MQTT Quality of Service
 		TLS      struct {
-			CACert string `yaml:"ca_cert"`
-		} `yaml:"tls"` // Path to the CA certificate
-		Topic string `yaml:"topic"`
+			CACert string `yaml:"ca_cert"` // Path to the CA certificate
+		} `yaml:"tls"`
+		Topic string `yaml:"topic"` // MQTT topic
 	} `yaml:"mqtt"`
 
-	DB struct {
-		Host     string `yaml:"host"`     // Database host address
-		Port     int    `yaml:"port"`     // Database port
-		User     string `yaml:"user"`     // Database user
-		Password string `yaml:"password"` // Database password
-		Name     string `yaml:"dbname"`   // Database name
-		SSLMode  string `yaml:"sslmode"`  // SSL mode for the connection
-	} `yaml:"database"`
+	Kafka struct {
+		Brokers         []string `yaml:"brokers"`         // List of Kafka brokers
+		ClientID        string   `yaml:"client_id"`      // Kafka client ID
+		SecurityProtocol string   `yaml:"security_protocol"` // Security protocol
+		SSL             struct {
+			CACert string `yaml:"ca_cert"` // Path to the CA certificate
+			Cert   string `yaml:"cert"`    // Path to the client certificate
+			Key    string `yaml:"key"`     // Path to the client key
+		} `yaml:"ssl"`
+		SASL struct {
+			Mechanism string `yaml:"mechanism"` // SASL mechanism
+			Username  string `yaml:"username"`  // SASL username
+			Password  string `yaml:"password"`  // SASL password
+		} `yaml:"sasl"`
+	} `yaml:"kafka"`
 
-	Device struct {
-		SecretFile string `yaml:"secret_file"` // Device secret location
-	} `yaml:"device"`
+	TopicMappings []struct {
+		MQTTTopic  string `yaml:"mqtt_topic"`  // MQTT topic
+		KafkaTopic string `yaml:"kafka_topic"` // Kafka topic
+	} `yaml:"topic_mappings"`
 }
+
 
 // LoadConfig loads the YAML configuration from the specified file.
 // It returns a pointer to the Config struct and an error if loading fails.
