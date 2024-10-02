@@ -6,6 +6,21 @@ mqtt:
     ca_cert: "certs/broker.emqx.io-ca.crt"
   QOS: 1
 
+kafka:
+  topic: "iot_heartbeat"
+  brokers: ["localhost:9092"]
+  client_id: "kafka-mqtt-connector"
+  security_protocol: "SSL"  
+  group_id: "iot_heartbeat_service_group"
+  ssl:
+    ca_cert: "path/to/ca-cert.pem"          
+    cert: "path/to/client-cert.pem"         
+    key: "path/to/client-key.pem"            
+  sasl:
+    mechanism: "PLAIN"                        
+    username: "your-username"                 
+    password: "your-password"  
+
 database:
   host: "mgyesa3twa.m6cs99jzs9.tsdb.cloud.timescale.com"
   user: "tsdbadmin"
@@ -13,3 +28,6 @@ database:
   dbname: "tsdb"
   port: 38527
   sslmode: "require"
+
+service:
+  mode: "queue"

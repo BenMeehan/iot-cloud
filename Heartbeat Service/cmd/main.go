@@ -7,6 +7,7 @@ import (
 	"github.com/benmeehan/iot-heartbeat-service/internal/database"
 	"github.com/benmeehan/iot-heartbeat-service/internal/services"
 	"github.com/benmeehan/iot-heartbeat-service/internal/utils"
+	"github.com/benmeehan/iot-heartbeat-service/pkg/kafka"
 	"github.com/benmeehan/iot-heartbeat-service/pkg/mqtt"
 	"github.com/google/uuid"
 
@@ -49,15 +50,25 @@ func main() {
 	}
 	defer dBClient.Close()
 
-	// Start Heartbeat service and subscribe to topic
-	heartbeatService := &services.HeartbeatService{
-		QOS:        config.MQTT.QOS,
-		SubTopic:   config.MQTT.Topic,
-		MqttClient: mqttClient,
-		DBClient:   dBClient,
-		Logger:     log,
+	// Inititalize Kafka consumer
+	kafkaClient, err := kafka.NewKafkaClient(
+		config.Kafka.SecurityProtocol,
+		config.Kafka.SSL.CACert,
+		config.Kafka.SSL.Cert,
+		config.Kafka.SSL.Key,
+		config.Kafka.SASL.Mechanism,
+		config.Kafka.SASL.Username,
+		config.Kafka.SASL.Password,
+		config.Kafka.Brokers,
+		config.Kafka.GroupID,
+		log,
+	)
+	if err != nil {
+		log.WithError(err).Fatal("Failed to initialize Kafka Client")
 	}
 
+	// Start heartbeat service and listen for device heartbeats
+	heartbeatService := services.NewHeartbeatService(config.Service.Mode, mqttClient, kafkaClient, dBClient, config.MQTT.Topic, config.MQTT.QOS, log)
 	heartbeatService.ListenForDeviceHeartbeats()
 
 	// Block the main thread to keep services running

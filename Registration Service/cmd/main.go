@@ -8,6 +8,7 @@ import (
 	"github.com/benmeehan/iot-registration-service/internal/services"
 	"github.com/benmeehan/iot-registration-service/internal/utils"
 	"github.com/benmeehan/iot-registration-service/pkg/file"
+	"github.com/benmeehan/iot-registration-service/pkg/kafka"
 	"github.com/benmeehan/iot-registration-service/pkg/mqtt"
 	"github.com/google/uuid"
 
@@ -58,16 +59,24 @@ func main() {
 		log.WithError(err).Fatal("Failed to read auth secret")
 	}
 
-	registraionService := &services.RegistrationService{
-		MqttClient: mqttClient,
-		DBClient:   dBClient,
-		QOS:        config.MQTT.QOS,
-		SubTopic:   config.MQTT.Topics.Request,
-		PubTopic:   config.MQTT.Topics.Response,
-		Secret:     secret,
-		Logger:     log,
+	// Inititalize Kafka consumer
+	kafkaClient, err := kafka.NewKafkaClient(
+		config.Kafka.SecurityProtocol,
+		config.Kafka.SSL.CACert,
+		config.Kafka.SSL.Cert,
+		config.Kafka.SSL.Key,
+		config.Kafka.SASL.Mechanism,
+		config.Kafka.SASL.Username,
+		config.Kafka.SASL.Password,
+		config.Kafka.Brokers,
+		config.Kafka.GroupID,
+		log,
+	)
+	if err != nil {
+		log.WithError(err).Fatal("Failed to initialize Kafka Client")
 	}
 
+	registraionService := services.NewRegistrationService(config.Service.Mode, mqttClient, kafkaClient, dBClient, config.MQTT.Topics.Response, config.MQTT.Topics.Request, config.MQTT.QOS, secret, log)
 	registraionService.ListenForDeviceRegistration()
 
 	// Block the main thread to keep services running

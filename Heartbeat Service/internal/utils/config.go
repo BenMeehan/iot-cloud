@@ -28,9 +28,27 @@ type Config struct {
 		SSLMode  string `yaml:"sslmode"`  // SSL mode for the connection
 	} `yaml:"database"`
 
-	Device struct {
-		SecretFile string `yaml:"secret_file"` // Device secret location
-	} `yaml:"device"`
+	Kafka struct {
+		Topic            string   `yaml:"brokers"`           // Kafka topic
+		Brokers          []string `yaml:"brokers"`           // List of Kafka brokers
+		ClientID         string   `yaml:"client_id"`         // Kafka client ID
+		SecurityProtocol string   `yaml:"security_protocol"` // Security protocol
+		GroupID          string   `yaml:"group_id"`          // Consumer Group ID
+		SSL              struct {
+			CACert string `yaml:"ca_cert"` // Path to the CA certificate
+			Cert   string `yaml:"cert"`    // Path to the client certificate
+			Key    string `yaml:"key"`     // Path to the client key
+		} `yaml:"ssl"`
+		SASL struct {
+			Mechanism string `yaml:"mechanism"` // SASL mechanism
+			Username  string `yaml:"username"`  // SASL username
+			Password  string `yaml:"password"`  // SASL password
+		} `yaml:"sasl"`
+	} `yaml:"kafka"`
+
+	Service struct {
+		Mode string `yaml:"mode"` // Direct MQTT or Queue mode
+	} `yaml:"service"`
 }
 
 // LoadConfig loads the YAML configuration from the specified file.
