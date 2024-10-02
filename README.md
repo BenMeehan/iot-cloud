@@ -10,16 +10,19 @@ This service receives device heartbeats through MQTT and stores them in Timescal
 ### Registration Service
 This service listens for device registration requests over MQTT, validates device secrets, generates unique device IDs, and stores device information in a PostgreSQL (TimescaleDB) database.
 
-## Running the project
+### Metrics Service
+This service collects and processes system and process metrics from IoT devices via MQTT. It stores the collected metrics in TimescaleDB for monitoring and analysis.
+
+## Running the Project
 To run the project, execute:
 ```bash
 go run cmd/main.go
 ```
 
-## To add a new service
+## To Add a New Service
 1. Create a new folder at the root of the project and add your service there.
 
-### Useful URLs
+## Useful URLs
 
 - [Public MQTT Broker](https://www.emqx.com/en/mqtt/public-mqtt5-broker)
 - [TimescaleDB](https://www.timescaledb.com)
