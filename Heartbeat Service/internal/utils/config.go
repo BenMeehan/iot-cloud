@@ -29,7 +29,7 @@ type Config struct {
 	} `yaml:"database"`
 
 	Kafka struct {
-		Topic            string   `yaml:"brokers"`           // Kafka topic
+		Topic            string   `yaml:"topic"`             // Kafka topic
 		Brokers          []string `yaml:"brokers"`           // List of Kafka brokers
 		ClientID         string   `yaml:"client_id"`         // Kafka client ID
 		SecurityProtocol string   `yaml:"security_protocol"` // Security protocol
@@ -49,7 +49,7 @@ type Config struct {
 	Service struct {
 		Mode string `yaml:"mode"` // Direct MQTT or Queue mode
 	} `yaml:"service"`
-  
+
 	Device struct {
 		SecretFile string `yaml:"secret_file"` // Device secret location
 	} `yaml:"device"`

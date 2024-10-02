@@ -30,4 +30,4 @@ database:
   sslmode: "require"
 
 service:
-  mode: "queue"
+  mode: "mqtt"

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/benmeehan/iot-heartbeat-service/internal/constants"
 	"github.com/benmeehan/iot-heartbeat-service/internal/database"
 	"github.com/benmeehan/iot-heartbeat-service/internal/services"
 	"github.com/benmeehan/iot-heartbeat-service/internal/utils"
@@ -50,21 +51,25 @@ func main() {
 	}
 	defer dBClient.Close()
 
-	// Inititalize Kafka consumer
-	kafkaClient, err := kafka.NewKafkaClient(
-		config.Kafka.SecurityProtocol,
-		config.Kafka.SSL.CACert,
-		config.Kafka.SSL.Cert,
-		config.Kafka.SSL.Key,
-		config.Kafka.SASL.Mechanism,
-		config.Kafka.SASL.Username,
-		config.Kafka.SASL.Password,
-		config.Kafka.Brokers,
-		config.Kafka.GroupID,
-		log,
-	)
-	if err != nil {
-		log.WithError(err).Fatal("Failed to initialize Kafka Client")
+	var kafkaClient *kafka.KafkaClient
+
+	// Initialize Kafka client only if the mode is queue
+	if config.Service.Mode == constants.QUEUE_MODE {
+		kafkaClient, err = kafka.NewKafkaClient(
+			config.Kafka.SecurityProtocol,
+			config.Kafka.SSL.CACert,
+			config.Kafka.SSL.Cert,
+			config.Kafka.SSL.Key,
+			config.Kafka.SASL.Mechanism,
+			config.Kafka.SASL.Username,
+			config.Kafka.SASL.Password,
+			config.Kafka.Brokers,
+			config.Kafka.GroupID,
+			log,
+		)
+		if err != nil {
+			log.WithError(err).Fatal("Failed to initialize Kafka Client")
+		}
 	}
 
 	// Start heartbeat service and listen for device heartbeats

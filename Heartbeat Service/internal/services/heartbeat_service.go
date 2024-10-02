@@ -77,14 +77,14 @@ func (h *HeartbeatService) handleMessage(client MQTT.Client, msg MQTT.Message) {
 	}
 }
 
-func (h *HeartbeatService) handleKafkaMessage(msg KAFKA.Message) {
+func (h *HeartbeatService) handleKafkaMessage(msg *KAFKA.Message) {
 	h.Logger.WithFields(logrus.Fields{
-		"topic":   msg.Topic,
-		"payload": string(msg.Payload),
+		"topic":   *msg.TopicPartition.Topic,
+		"payload": string(msg.Value),
 	}).Info("Received message from Kafka")
 
 	var hb models.Heartbeat
-	err := json.Unmarshal(msg.Payload, &hb)
+	err := json.Unmarshal(msg.Value, &hb)
 	if err != nil {
 		h.Logger.Errorf("Failed to decode Kafka message: %v", err)
 		return
