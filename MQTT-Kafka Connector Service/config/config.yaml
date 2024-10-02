@@ -1,0 +1,26 @@
+mqtt:
+  broker: "ssl://broker.emqx.io:8883"
+  client_id: "iot_heartbeat_service-"
+  topic: "$share/heartbeat/iot-heartbeat"
+  tls:
+    ca_cert: "certs/broker.emqx.io-ca.crt"
+  QOS: 1
+
+kafka:
+  brokers: ["localhost:9092"]
+  client_id: "kafka-mqtt-connector"
+  security_protocol: "SSL"  
+  ssl:
+    ca_cert: "path/to/ca-cert.pem"          
+    cert: "path/to/client-cert.pem"         
+    key: "path/to/client-key.pem"            
+  sasl:
+    mechanism: "PLAIN"                        
+    username: "your-username"                 
+    password: "your-password"                                        
+
+topic_mappings:
+  - mqtt_topic: "$share/heartbeat/iot-heartbeat"
+    kafka_topic: "iot_heartbeat"
+  - mqtt_topic: "$share/metrics/iot-metrics"
+    kafka_topic: "iot_metrics"

@@ -19,12 +19,15 @@ type DB interface {
 
 // Database holds the connection pool to the PostgreSQL database using GORM
 type Database struct {
-	Conn *gorm.DB
+	Conn   *gorm.DB
+	Logger *logrus.Logger
 }
 
 // NewDatabase initializes a new Database instance
-func NewDatabase() *Database {
-	return &Database{}
+func NewDatabase(logger *logrus.Logger) *Database {
+	return &Database{
+		Logger: logger,
+	}
 }
 
 // Connect establishes the database connection using GORM
@@ -32,14 +35,14 @@ func (d *Database) Connect(connStr string) error {
 	var err error
 	d.Conn, err = gorm.Open(postgres.Open(connStr), &gorm.Config{})
 	if err != nil {
-		logrus.WithError(err).Fatal("Failed to open database connection")
+		d.Logger.WithError(err).Fatal("Failed to open database connection")
 		return err
 	}
 
 	// Ensure the heartbeats table exists and is a hypertable
 	d.EnsureHeartbeatTable()
 
-	logrus.Info("Connected to TimescaleDB")
+	d.Logger.Info("Connected to TimescaleDB")
 	return nil
 }
 
@@ -49,14 +52,14 @@ func (d *Database) EnsureHeartbeatTable() {
 	if !d.tableExists("heartbeats") {
 		d.createHeartbeatTable()
 	} else {
-		logrus.Info("Table 'heartbeats' already exists")
+		d.Logger.Info("Table 'heartbeats' already exists")
 	}
 
 	// Check if it's already a hypertable
 	if !d.isHypertable("heartbeats") {
 		d.convertToHypertable()
 	} else {
-		logrus.Info("Table 'heartbeats' is already a hypertable")
+		d.Logger.Info("Table 'heartbeats' is already a hypertable")
 	}
 }
 
@@ -76,9 +79,9 @@ func (d *Database) createHeartbeatTable() {
             status TEXT
         );`
 	if err := d.Conn.Exec(createTableSQL).Error; err != nil {
-		logrus.Fatalf("Error creating heartbeats table: %v", err)
+		d.Logger.Fatalf("Error creating heartbeats table: %v", err)
 	}
-	logrus.Info("Created 'heartbeats' table")
+	d.Logger.Info("Created 'heartbeats' table")
 }
 
 // Check if the table is a hypertable
@@ -92,15 +95,15 @@ func (d *Database) isHypertable(tableName string) bool {
 func (d *Database) convertToHypertable() {
 	convertSQL := "SELECT create_hypertable('heartbeats', 'timestamp');"
 	if err := d.Conn.Exec(convertSQL).Error; err != nil {
-		logrus.Fatalf("Error converting table to hypertable: %v", err)
+		d.Logger.Fatalf("Error converting table to hypertable: %v", err)
 	}
-	logrus.Info("Converted 'heartbeats' table to hypertable")
+	d.Logger.Info("Converted 'heartbeats' table to hypertable")
 }
 
 // Close closes the database connection
 func (d *Database) Close() error {
 	// GORM handles connection pooling, so Close is not implemented like in sql.DB
-	logrus.Info("Database connection closed (handled by GORM)")
+	d.Logger.Info("Database connection closed (handled by GORM)")
 	return nil
 }
 
