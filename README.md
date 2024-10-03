@@ -2,6 +2,8 @@
 
 IOT Cloud is a collection of Golang microservices that operate as event-driven systems, designed to work seamlessly with the IOT Agent to command, monitor, and track devices.
 
+Pre-Alpha Discussions: [Here](https://github.com/BenMeehan/iot-cloud/discussions/5)
+
 ## Services
 
 ### Heartbeat Service
